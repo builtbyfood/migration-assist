@@ -1,0 +1,57 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+    dependencies {
+        classpath "com.morpheusdata:morpheus-plugin-gradle:${morphPluginGradleVersion}"
+    }
+}
+
+plugins {
+    id 'groovy'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+}
+
+apply plugin: 'com.morpheusdata.morpheus-plugin-gradle'
+
+group = 'com.morpheusdata'
+version = '0.3.0'
+sourceCompatibility = '11'
+targetCompatibility = '11'
+
+tasks.withType(JavaCompile) { options.encoding = 'UTF-8' }
+tasks.withType(GroovyCompile) { options.encoding = 'UTF-8'; groovyOptions.encoding = 'UTF-8' }
+
+repositories {
+    mavenCentral()
+    maven { url 'https://plugins.gradle.org/m2/' }
+}
+
+dependencies {
+    compileOnly "com.morpheusdata:morpheus-plugin-api:${morphPluginApiVersion}"
+    compileOnly "org.codehaus.groovy:groovy-all:${groovyVersion}"
+    compileOnly 'io.reactivex.rxjava2:rxjava:2.2.21'
+    compileOnly "org.slf4j:slf4j-api:${slf4jVersion}"
+}
+
+jar {
+    manifest {
+        attributes(
+            'Plugin-Class'                  : 'com.morpheusdata.migrationassist.MigrationAssistPlugin',
+            'Plugin-Version'                : version,
+            'Morpheus-Name'                 : 'Migration Assist',
+            'Morpheus-Organization'         : 'Travis DeLuca',
+            'Morpheus-Code'                 : 'migrationAssist',
+            'Morpheus-Description'          : 'VMware to HVM migration plans: per-VM phase tracking, stall detection, pre-flight network/DHCP/WinRM checks, NIC snapshots and plan credentials.',
+            'Morpheus-Min-Appliance-Version': '8.1.0'
+        )
+    }
+}
+
+shadowJar {
+    archiveClassifier.set('all')
+    mergeServiceFiles()
+}
+
+tasks.assemble.dependsOn tasks.shadowJar
